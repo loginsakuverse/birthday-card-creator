@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Whimsical Birthday Card Creator ✨</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fff5f7 0%, #f0e6ff 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 30px;
+            height: calc(100vh - 100px);
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #ffc0cb 0%, #ffb6d9 50%, #e0a3ff 100%);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(255, 192, 203, 0.3);
+            z-index: 1000;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 32px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            letter-spacing: 2px;
+        }
+
+        /* Main Content */
+        .content {
+            margin-top: 100px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .panel h2 {
+            color: #ff69b4;
+            margin-bottom: 20px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel h2::before {
+            content: '✨';
+            font-size: 24px;
+        }
+
+        /* Canvas */
+        #cardCanvas {
+            border: 3px solid #ffc0cb;
+            border-radius: 20px;
+            cursor: default;
+            background: white;
+            box-shadow: 0 15px 40px rgba(255, 192, 203, 0.3);
+            max-width: 100%;
+            margin: 0 auto;
+            display: block;
+        }
+
+        /* Controls */
+        .control-group {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #ffe6f0;
+        }
+
+        .control-group:last-child {
+            border-bottom: none;
+        }
+
+        .control-group label {
+            display: block;
+            color: #ff69b4;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="file"],
+        input[type="text"],
+        input[type="number"],
+        input[type="color"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ffe6f0;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="color"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #ff69b4;
+            box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        input[type="color"] {
+            cursor: pointer;
+            height: 45px;
+            padding: 3px;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #e0a3ff 0%, #d180ff 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(224, 163, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(224, 163, 255, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #ffb6d9 0%, #ffc0cb 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 192, 203, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 192, 203, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Text Formatting Toolbar */
+        .format-toolbar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .format-btn {
+            padding: 10px;
+            border: 2px solid #ffe6f0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 12px;
+        }
+
+        .format-btn:hover {
+            background: #ffe6f0;
+            border-color: #ff69b4;
+        }
+
+        .format-btn.active {
+            background: #ff69b4;
+            color: white;
+            border-color: #ff69b4;
+        }
+
+        /* Decoration Selection */
+        .decoration-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .decoration-btn {
+            aspect-ratio: 1;
+            border: 2px solid #ffe6f0;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 28px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .decoration-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.2);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ffe6f0;
+        }
+
+        .tab-btn {
+            padding: 10px 15px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            color: #999;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .tab-btn.active {
+            color: #ff69b4;
+            border-bottom-color: #ff69b4;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Right Panel - My Cards */
+        .saved-cards-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .card-thumbnail {
+            border: 2px solid #ffe6f0;
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fffaf9;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-thumbnail:hover {
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .card-thumbnail img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .card-thumbnail-info {
+            font-size: 12px;
+            color: #ff69b4;
+            margin-bottom: 8px;
+        }
+
+        .card-thumbnail-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .card-thumbnail-actions button {
+            padding: 6px 10px;
+            font-size: 11px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn {
+            background: #ff6b9d;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #ff1493;
+        }
+
+        .load-btn {
+            background: #b19cd9;
+            color: white;
+        }
+
+        .load-btn:hover {
+            background: #a680d0;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                height: auto;
+                gap: 20px;
+            }
+
+            .panel {
+                max-height: none;
+            }
+
+            #cardCanvas {
+                max-width: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .panel {
+                padding: 20px;
+            }
+
+            #cardCanvas {
+                max-width: 100%;
+                width: 100%;
+                height: auto;
+            }
+
+            .decoration-grid {
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+            }
+
+            .format-toolbar {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        /* Sparkle Animation */
+        @keyframes sparkle {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+        }
+
+        .sparkle-element {
+            animation: sparkle 1.5s ease-in-out infinite;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        .modal-content h2 {
+            color: #ff69b4;
+            margin-bottom: 20px;
+        }
+
+        .modal-content p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .modal-buttons button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-buttons .btn-primary {
+            width: auto;
+            margin-bottom: 0;
+        }
+
+        .modal-buttons .btn-secondary {
+            width: auto;
+            margin-bottom: 0;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+            animation: slideIn 0.3s ease;
+            z-index: 3000;
+            max-width: 300px;
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #90EE90 0%, #32CD32 100%);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ff69b4;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff1493;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>✨ Whimsical Birthday Card Creator ✨</h1>
+    </div>
+
+    <div class="content">
+        <div class="container">
+            <!-- Left Panel: Controls -->
+            <div class="panel">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="upload">Upload & Text</button>
+                    <button class="tab-btn" data-tab="format">Format</button>
+                    <button class="tab-btn" data-tab="background">Background</button>
+                    <button class="tab-btn" data-tab="decorations">Decorations</button>
+                </div>
+
+                <!-- Upload & Text Tab -->
+                <div id="upload-tab" class="tab-content active">
+                    <div class="control-group">
+                        <label for="photoUpload">📷 Upload Photo</label>
+                        <input type="file" id="photoUpload" accept="image/*">
+                        <button class="btn btn-primary" id="clearPhotoBtn">Clear Photo</button>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="messageText">💌 Birthday Message</label>
+                        <textarea id="messageText" placeholder="Write your birthday message here..."></textarea>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="cardName">🎂 Card Name (for saving)</label>
+                        <input type="text" id="cardName" placeholder="e.g., Sarah's 21st Birthday">
+                    </div>
+                </div>
+
+                <!-- Format Tab -->
+                <div id="format-tab" class="tab-content">
+                    <div class="control-group">
+                        <label>✨ Text Formatting</label>
+                        <div class="format-toolbar">
+                            <button class="format-btn" id="boldBtn" title="Bold"><strong>B</strong></button>
+                            <button class="format-btn" id="italicBtn" title="Italic"><em>I</em></button>
+                            <button class="format-btn" id="underlineBtn" title="Underline"><u>U</u></button>
+                            <button class="format-btn" id="leftAlignBtn" title="Left Align">⬅</button>
+                            <button class="format-btn" id="centerAlignBtn" title="Center Align">↔</button>
+                            <button class="format-btn" id="rightAlignBtn" title="Right Align">➡</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="fontSize">📏 Font Size</label>
+                        <input type="number" id="fontSize" min="12" max="72" value="24">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="fontFamily">🔤 Font Style</label>
+                        <select id="fontFamily">
+                            <option value="Segoe UI">Modern</option>
+                            <option value="Georgia">Elegant</option>
+                            <option value="Comic Sans MS">Playful</option>
+                            <option value="Courier New">Typewriter</option>
+                            <option value="cursive">Cursive</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="textColor">🎨 Text Color</label>
+                        <input type="color" id="textColor" value="#ff69b4">
+                    </div>
+                </div>
+
+                <!-- Background Tab -->
+                <div id="background-tab" class="tab-content">
+                    <div class="control-group">
+                        <label for="bgColor">🎨 Background Color</label>
+                        <input type="color" id="bgColor" value="#ffffff">
+                    </div>
+
+                    <div class="control-group">
+                        <label>🌈 Preset Colors</label>
+                        <div class="decoration-grid">
+                            <button class="decoration-btn" onclick="setBgColor('#ffffff')" title="White" style="background: white; border: 2px solid #ffe6f0;">⚪</button>
+                            <button class="decoration-btn" onclick="setBgColor('#fff5f7')" title="Soft Pink" style="background: #fff5f7;">🌸</button>
+                            <button class="decoration-btn" onclick="setBgColor('#ffe6f0')" title="Light Pink">💕</button>
+                            <button class="decoration-btn" onclick="setBgColor('#f0e6ff')" title="Lavender">💜</button>
+                            <button class="decoration-btn" onclick="setBgColor('#fff0f5')" title="Light Rose">🌹</button>
+                            <button class="decoration-btn" onclick="setBgColor('#fffacd')" title="Pale Yellow">✨</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>🎀 Patterns</label>
+                        <select id="patternSelect">
+                            <option value="none">None</option>
+                            <option value="dots">Cute Dots</option>
+                            <option value="stars">Twinkle Stars</option>
+                            <option value="hearts">Floating Hearts</option>
+                            <option value="flowers">Flowery</option>
+                            <option value="clouds">Dreamy Clouds</option>
+                            <option value="ribbons">Ribbon Swirls</option>
+                        </select>
+                        <button class="btn btn-secondary" id="applyPatternBtn">Apply Pattern</button>
+                    </div>
+                </div>
+
+                <!-- Decorations Tab -->
+                <div id="decorations-tab" class="tab-content">
+                    <div class="control-group">
+                        <label>✨ Add Decorations</label>
+                        <div class="decoration-grid">
+                            <button class="decoration-btn" onclick="addDecoration('✨')">✨</button>
+                            <button class="decoration-btn" onclick="addDecoration('💕')">💕</button>
+                            <button class="decoration-btn" onclick="addDecoration('⭐')">⭐</button>
+                            <button class="decoration-btn" onclick="addDecoration('🌸')">🌸</button>
+                            <button class="decoration-btn" onclick="addDecoration('🌹')">🌹</button>
+                            <button class="decoration-btn" onclick="addDecoration('🦋')">🦋</button>
+                            <button class="decoration-btn" onclick="addDecoration('🎀')">🎀</button>
+                            <button class="decoration-btn" onclick="addDecoration('🎁')">🎁</button>
+                            <button class="decoration-btn" onclick="addDecoration('💫')">💫</button>
+                            <button class="decoration-btn" onclick="addDecoration('🌙')">🌙</button>
+                            <button class="decoration-btn" onclick="addDecoration('☁️')">☁️</button>
+                            <button class="decoration-btn" onclick="addDecoration('🎂')">🎂</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>🎉 More Decorations</label>
+                        <div class="decoration-grid">
+                            <button class="decoration-btn" onclick="addDecoration('🌟')">🌟</button>
+                            <button class="decoration-btn" onclick="addDecoration('💖')">💖</button>
+                            <button class="decoration-btn" onclick="addDecoration('🎊')">🎊</button>
+                            <button class="decoration-btn" onclick="addDecoration('✨💫')">✨💫</button>
+                            <button class="decoration-btn" onclick="addDecoration('🎈')">🎈</button>
+                            <button class="decoration-btn" onclick="addDecoration('🌺')">🌺</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <button class="btn btn-primary" id="addSparklesBtn">✨ Add Sparkles</button>
+                        <button class="btn btn-secondary" id="clearDecorationsBtn">Clear All</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <button class="btn btn-primary" id="saveCardBtn">💾 Save Card</button>
+                    <button class="btn btn-success" id="downloadBtn">📥 Download as PNG</button>
+                </div>
+            </div>
+
+            <!-- Center: Canvas -->
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <canvas id="cardCanvas" width="500" height="700"></canvas>
+            </div>
+
+            <!-- Right Panel: My Cards -->
+            <div class="panel">
+                <h2>📚 My Cards</h2>
+                <div id="savedCardsContainer" class="saved-cards-container">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💌</div>
+                        <p>No saved cards yet. Create and save your first birthday card!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h2>✨ Confirm Action</h2>
+            <p id="confirmMessage"></p>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" id="confirmBtn">Yes</button>
+                <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas Setup
+        const canvas = document.getElementById('cardCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Card State
+        let cardState = {
+            photo: null,
+            photoX: 100,
+            photoY: 100,
+            photoWidth: 300,
+            photoHeight: 300,
+            message: 'Happy Birthday!',
+            fontSize: 24,
+            fontFamily: 'Segoe UI',
+            textColor: '#ff69b4',
+            bold: false,
+            italic: false,
+            underline: false,
+            textAlign: 'center',
+            bgColor: '#ffffff',
+            pattern: 'none',
+            decorations: []
+        };
+
+        let selectedDecoration = null;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSavedCards();
+            drawCard();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Photo Upload
+            document.getElementById('photoUpload').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            cardState.photo = img;
+                            drawCard();
+                            showNotification('Photo added! ✨');
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            document.getElementById('clearPhotoBtn').addEventListener('click', () => {
+                cardState.photo = null;
+                document.getElementById('photoUpload').value = '';
+                drawCard();
+                showNotification('Photo removed! 💌');
+            });
+
+            // Message
+            document.getElementById('messageText').addEventListener('input', (e) => {
+                cardState.message = e.target.value || 'Happy Birthday!';
+                drawCard();
+            });
+
+            // Font Size
+            document.getElementById('fontSize').addEventListener('input', (e) => {
+                cardState.fontSize = parseInt(e.target.value);
+                drawCard();
+            });
+
+            // Font Family
+            document.getElementById('fontFamily').addEventListener('change', (e) => {
+                cardState.fontFamily = e.target.value;
+                drawCard();
+            });
+
+            // Text Color
+            document.getElementById('textColor').addEventListener('input', (e) => {
+                cardState.textColor = e.target.value;
+                drawCard();
+            });
+
+            // Background Color
+            document.getElementById('bgColor').addEventListener('input', (e) => {
+                cardState.bgColor = e.target.value;
+                drawCard();
+            });
+
+            // Format Buttons
+            document.getElementById('boldBtn').addEventListener('click', () => {
+                cardState.bold = !cardState.bold;
+                document.getElementById('boldBtn').classList.toggle('active');
+                drawCard();
+            });
+
+            document.getElementById('italicBtn').addEventListener('click', () => {
+                cardState.italic = !cardState.italic;
+                document.getElementById('italicBtn').classList.toggle('active');
+                drawCard();
+            });
+
+            document.getElementById('underlineBtn').addEventListener('click', () => {
+                cardState.underline = !cardState.underline;
+                document.getElementById('underlineBtn').classList.toggle('active');
+                drawCard();
+            });
+
+            document.getElementById('leftAlignBtn').addEventListener('click', () => {
+                cardState.textAlign = 'left';
+                updateAlignButtons();
+                drawCard();
+            });
+
+            document.getElementById('centerAlignBtn').addEventListener('click', () => {
+                cardState.textAlign = 'center';
+                updateAlignButtons();
+                drawCard();
+            });
+
+            document.getElementById('rightAlignBtn').addEventListener('click', () => {
+                cardState.textAlign = 'right';
+                updateAlignButtons();
+                drawCard();
+            });
+
+            // Pattern
+            document.getElementById('applyPatternBtn').addEventListener('click', () => {
+                cardState.pattern = document.getElementById('patternSelect').value;
+                drawCard();
+                showNotification('Pattern applied! 🌸');
+            });
+
+            // Sparkles
+            document.getElementById('addSparklesBtn').addEventListener('click', () => {
+                for (let i = 0; i < 15; i++) {
+                    addDecoration('✨');
+                }
+                showNotification('Sparkles added! ✨');
+            });
+
+            // Clear Decorations
+            document.getElementById('clearDecorationsBtn').addEventListener('click', () => {
+                cardState.decorations = [];
+                drawCard();
+                showNotification('Decorations cleared! 💌');
+            });
+
+            // Save Card
+            document.getElementById('saveCardBtn').addEventListener('click', saveCard);
+
+            // Download
+            document.getElementById('downloadBtn').addEventListener('click', downloadCard);
+
+            // Tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tab = btn.dataset.tab;
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById(tab + '-tab').classList.add('active');
+                });
+            });
+
+            // Canvas Mouse Events
+            canvas.addEventListener('mousedown', handleCanvasMouseDown);
+            canvas.addEventListener('mousemove', handleCanvasMouseMove);
+            canvas.addEventListener('mouseup', handleCanvasMouseUp);
+            canvas.addEventListener('click', handleCanvasClick);
+
+            // Modal
+            document.getElementById('cancelBtn').addEventListener('click', closeConfirmModal);
+        }
+
+        function handleCanvasMouseDown(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Check if clicking on photo
+            if (cardState.photo) {
+                if (x >= cardState.photoX && x <= cardState.photoX + cardState.photoWidth &&
+                    y >= cardState.photoY && y <= cardState.photoY + cardState.photoHeight) {
+                    selectedDecoration = null;
+                    dragOffsetX = x - cardState.photoX;
+                    dragOffsetY = y - cardState.photoY;
+                    return;
+                }
+            }
+
+            // Check if clicking on decoration
+            for (let i = cardState.decorations.length - 1; i >= 0; i--) {
+                const dec = cardState.decorations[i];
+                const decWidth = 40;
+                const decHeight = 40;
+                if (x >= dec.x && x <= dec.x + decWidth &&
+                    y >= dec.y && y <= dec.y + decHeight) {
+                    selectedDecoration = i;
+                    dragOffsetX = x - dec.x;
+                    dragOffsetY = y - dec.y;
+                    return;
+                }
+            }
+
+            selectedDecoration = null;
+        }
+
+        function handleCanvasMouseMove(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            if (selectedDecoration === null && cardState.photo) {
+                if (x >= cardState.photoX && x <= cardState.photoX + cardState.photoWidth &&
+                    y >= cardState.photoY && y <= cardState.photoY + cardState.photoHeight) {
+                    canvas.style.cursor = 'grab';
+                    return;
+                }
+            } else if (selectedDecoration !== null) {
+                canvas.style.cursor = 'grabbing';
+                cardState.decorations[selectedDecoration].x = x - dragOffsetX;
+                cardState.decorations[selectedDecoration].y = y - dragOffsetY;
+                drawCard();
+                return;
+            }
+
+            canvas.style.cursor = 'default';
+        }
+
+        function handleCanvasMouseUp(e) {
+            canvas.style.cursor = 'default';
+        }
+
+        function handleCanvasClick(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Right click to delete (simulate with ctrl+click or double-click)
+            if (e.ctrlKey || e.button === 2) {
+                for (let i = cardState.decorations.length - 1; i >= 0; i--) {
+                    const dec = cardState.decorations[i];
+                    if (x >= dec.x && x <= dec.x + 40 && y >= dec.y && y <= dec.y + 40) {
+                        cardState.decorations.splice(i, 1);
+                        drawCard();
+                        showNotification('Decoration removed! 💌');
+                        return;
+                    }
+                }
+            }
+        }
+
+        function drawCard() {
+            // Clear canvas
+            ctx.fillStyle = cardState.bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw pattern
+            if (cardState.pattern !== 'none') {
+                drawPattern(cardState.pattern);
+            }
+
+            // Draw photo
+            if (cardState.photo) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.roundRect(cardState.photoX, cardState.photoY, cardState.photoWidth, cardState.photoHeight, 15);
+                ctx.clip();
+                ctx.drawImage(cardState.photo, cardState.photoX, cardState.photoY, cardState.photoWidth, cardState.photoHeight);
+                ctx.restore();
+
+                // Draw border
+                ctx.strokeStyle = '#ff69b4';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(cardState.photoX, cardState.photoY, cardState.photoWidth, cardState.photoHeight, 15);
+                ctx.stroke();
+            }
+
+            // Draw decorations
+            cardState.decorations.forEach((dec, i) => {
+                ctx.font = '40px Arial';
+                ctx.fillText(dec.text, dec.x, dec.y + 30);
+
+                if (i === selectedDecoration) {
+                    ctx.strokeStyle = '#ff69b4';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(dec.x - 5, dec.y - 5, 50, 50);
+                }
+            });
+
+            // Draw message
+            drawMessage();
+        }
+
+        function drawMessage() {
+            ctx.fillStyle = cardState.textColor;
+            let fontStyle = '';
+            if (cardState.bold) fontStyle += 'bold ';
+            if (cardState.italic) fontStyle += 'italic ';
+            ctx.font = `${fontStyle}${cardState.fontSize}px ${cardState.fontFamily}`;
+            ctx.textAlign = cardState.textAlign;
+
+            let x = canvas.width / 2;
+            if (cardState.textAlign === 'left') x = 30;
+            if (cardState.textAlign === 'right') x = canvas.width - 30;
+
+            const lines = cardState.message.split('\n');
+            let y = canvas.height - 150;
+
+            lines.forEach((line, index) => {
+                ctx.fillText(line, x, y + index * (cardState.fontSize + 10));
+
+                if (cardState.underline) {
+                    const metrics = ctx.measureText(line);
+                    const textWidth = metrics.width;
+                    let textX = x - textWidth / 2;
+                    if (cardState.textAlign === 'left') textX = x;
+                    if (cardState.textAlign === 'right') textX = x - textWidth;
+
+                    ctx.strokeStyle = cardState.textColor;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(textX, y + index * (cardState.fontSize + 10) + 5);
+                    ctx.lineTo(textX + textWidth, y + index * (cardState.fontSize + 10) + 5);
+                    ctx.stroke();
+                }
+            });
+        }
+
+        function drawPattern(pattern) {
+            const patternSize = 40;
+            ctx.fillStyle = 'rgba(255, 192, 203, 0.2)';
+
+            switch (pattern) {
+                case 'dots':
+                    for (let x = 0; x < canvas.width; x += patternSize) {
+                        for (let y = 0; y < canvas.height; y += patternSize) {
+                            ctx.beginPath();
+                            ctx.arc(x, y, 5, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                    break;
+                case 'stars':
+                    ctx.font = '24px Arial';
+                    for (let x = 0; x < canvas.width; x += patternSize * 1.5) {
+                        for (let y = 0; y < canvas.height; y += patternSize * 1.5) {
+                            ctx.fillText('⭐', x, y);
+                        }
+                    }
+                    break;
+                case 'hearts':
+                    ctx.font = '28px Arial';
+                    for (let x = 0; x < canvas.width; x += patternSize * 1.5) {
+                        for (let y = 0; y < canvas.height; y += patternSize * 1.5) {
+                            ctx.fillText('💕', x, y);
+                        }
+                    }
+                    break;
+                case 'flowers':
+                    ctx.font = '32px Arial';
+                    for (let x = 0; x < canvas.width; x += patternSize * 2) {
+                        for (let y = 0; y < canvas.height; y += patternSize * 2) {
+                            ctx.fillText('🌸', x, y);
+                        }
+                    }
+                    break;
+                case 'clouds':
+                    ctx.font = '36px Arial';
+                    for (let x = 0; x < canvas.width; x += patternSize * 2.5) {
+                        for (let y = 0; y < canvas.height; y += patternSize * 2.5) {
+                            ctx.fillText('☁️', x, y);
+                        }
+                    }
+                    break;
+                case 'ribbons':
+                    ctx.strokeStyle = 'rgba(255, 192, 203, 0.3)';
+                    ctx.lineWidth = 3;
+                    for (let x = 0; x < canvas.width; x += patternSize * 2) {
+                        ctx.beginPath();
+                        ctx.moveTo(x, 0);
+                        ctx.quadraticCurveTo(x + 20, canvas.height / 2, x, canvas.height);
+                        ctx.stroke();
+                    }
+                    break;
+            }
+        }
+
+        function addDecoration(text) {
+            cardState.decorations.push({
+                text: text,
+                x: Math.random() * (canvas.width - 50),
+                y: Math.random() * (canvas.height - 150)
+            });
+            drawCard();
+        }
+
+        function setBgColor(color) {
+            cardState.bgColor = color;
+            document.getElementById('bgColor').value = color;
+            drawCard();
+        }
+
+        function updateAlignButtons() {
+            document.getElementById('leftAlignBtn').classList.remove('active');
+            document.getElementById('centerAlignBtn').classList.remove('active');
+            document.getElementById('rightAlignBtn').classList.remove('active');
+
+            if (cardState.textAlign === 'left') document.getElementById('leftAlignBtn').classList.add('active');
+            if (cardState.textAlign === 'center') document.getElementById('centerAlignBtn').classList.add('active');
+            if (cardState.textAlign === 'right') document.getElementById('rightAlignBtn').classList.add('active');
+        }
+
+        function saveCard() {
+            const cardName = document.getElementById('cardName').value || 'Birthday Card ' + new Date().toLocaleDateString();
+            
+            const cardData = {
+                name: cardName,
+                timestamp: new Date().toISOString(),
+                thumbnail: canvas.toDataURL('image/png'),
+                state: JSON.parse(JSON.stringify(cardState))
+            };
+
+            // Remove photo from state (save space, reload from file)
+            cardData.state.photo = null;
+
+            let savedCards = JSON.parse(localStorage.getItem('birthdayCards')) || [];
+            savedCards.push(cardData);
+            localStorage.setItem('birthdayCards', JSON.stringify(savedCards));
+
+            showNotification(`Card saved as "${cardName}"! 💾`);
+            loadSavedCards();
+            document.getElementById('cardName').value = '';
+        }
+
+        function loadSavedCards() {
+            const savedCards = JSON.parse(localStorage.getItem('birthdayCards')) || [];
+            const container = document.getElementById('savedCardsContainer');
+
+            if (savedCards.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💌</div>
+                        <p>No saved cards yet. Create and save your first birthday card!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            savedCards.forEach((card, index) => {
+                const date = new Date(card.timestamp).toLocaleDateString();
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card-thumbnail';
+                cardEl.innerHTML = `
+                    <img src="${card.thumbnail}" alt="${card.name}">
+                    <div class="card-thumbnail-info">
+                        <strong>${card.name}</strong>
+                        <div style="font-size: 11px; color: #999;">${date}</div>
+                    </div>
+                    <div class="card-thumbnail-actions">
+                        <button class="load-btn" onclick="loadCard(${index})">Load</button>
+                        <button class="delete-btn" onclick="deleteCard(${index})">Delete</button>
+                    </div>
+                `;
+                container.appendChild(cardEl);
+            });
+        }
+
+        function loadCard(index) {
+            const savedCards = JSON.parse(localStorage.getItem('birthdayCards')) || [];
+            const card = savedCards[index];
+
+            cardState = JSON.parse(JSON.stringify(card.state));
+
+            // Update UI
+            document.getElementById('messageText').value = cardState.message;
+            document.getElementById('fontSize').value = cardState.fontSize;
+            document.getElementById('fontFamily').value = cardState.fontFamily;
+            document.getElementById('textColor').value = cardState.textColor;
+            document.getElementById('bgColor').value = cardState.bgColor;
+            document.getElementById('patternSelect').value = cardState.pattern;
+
+            // Update format buttons
+            document.getElementById('boldBtn').classList.toggle('active', cardState.bold);
+            document.getElementById('italicBtn').classList.toggle('active', cardState.italic);
+            document.getElementById('underlineBtn').classList.toggle('active', cardState.underline);
+            updateAlignButtons();
+
+            drawCard();
+            showNotification(`Card "${card.name}" loaded! 💌`);
+        }
+
+        function deleteCard(index) {
+            showConfirmModal('Delete this card?', () => {
+                let savedCards = JSON.parse(localStorage.getItem('birthdayCards')) || [];
+                savedCards.splice(index, 1);
+                localStorage.setItem('birthdayCards', JSON.stringify(savedCards));
+                loadSavedCards();
+                showNotification('Card deleted! 🗑️');
+            });
+        }
+
+        function downloadCard() {
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = `birthday-card-${new Date().getTime()}.png`;
+            link.click();
+            showNotification('Card downloaded! 📥');
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function showConfirmModal(message, onConfirm) {
+            document.getElementById('confirmMessage').textContent = message;
+            document.getElementById('confirmModal').classList.add('show');
+            
+            const confirmBtn = document.getElementById('confirmBtn');
+            confirmBtn.onclick = () => {
+                onConfirm();
+                closeConfirmModal();
+            };
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.remove('show');
+        }
+
+        // Polyfill for roundRect
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                if (w < 2 * r) r = w / 2;
+                if (h < 2 * r) r = h / 2;
+                this.beginPath();
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                this.closePath();
+                return this;
+            };
+        }
+    </script>
+</body>
+</html>
